@@ -1,5 +1,5 @@
 /////////////// K.jpg's Simplex-Style Re-oriented 4Point BCC Noise ///////////////
-///////////////////// Experimantal non-spherical kernel test ////////////////////
+/////////////////// Experimantal space-tiling kernel experiment //////////////////
 
 // Inspired by Stefan Gustavson's noise
 vec4 permute(vec4 t) {
