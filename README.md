@@ -4,6 +4,8 @@
 #### SimlexGaborNoise.java
 Simplex-style noise modified to use a Gabor-like sinusoid kernel with variable direction and magnitude.
 
+![Simplex-Gabor Noise](images/SimplexGaborNoise.png?raw=true)
+
 ## Simplex-Gabor Noise (Isotropic version)
 #### SimlexGaborNoiseIso.java
 Simplex-style noise modified to use a Gabor-like sinusoid kernel with variable magnitude and randomized direction.
