@@ -7,7 +7,7 @@
  * Cellular noise on a square grid is usually already less obvious
  * than gradient/value noise on a square grid.
  *
- * Replace `double distance = djx * djx + djy * djy;` on lines 77 & 120
+ * Replace `double distance = djx * djx + djy * djy;` on lines 76 & 119
  * with `double distance = Math.sqrt(djx * djx + djy * djy);` if true
  * distance is needed.
  * 
