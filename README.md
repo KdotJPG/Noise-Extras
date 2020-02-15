@@ -1,5 +1,11 @@
 # Noise Extras
 
+## Simplex-Cellular Noise
+#### SimlexGaborNoise.java
+Cellular noise implemented using the lattice of Simplex noise. May or may not look nicer than traditional cellular noise. Cellular noise on a square grid is usually already less obvious than gradient/value noise on a square grid.
+
+![Simplex-Cellular Noise](images/SimplexCellularNoise.png?raw=true)
+
 ## Simplex-Gabor Noise
 #### SimlexGaborNoise.java
 Simplex-style noise modified to use a Gabor-like sinusoid kernel with variable direction and magnitude.
