@@ -6,11 +6,14 @@
  * May or may not look nicer than traditional cellular noise.
  * Cellular noise on a square grid is usually already less obvious
  * than gradient/value noise on a square grid.
+ *
+ * Replace `double distance = djx * djx + djy * djy;` on lines 77 & 120
+ * with `double distance = Math.sqrt(djx * djx + djy * djy);` if true
+ * distance is needed.
  * 
  * Version 02/05/2015 created for Realistic Terrain Generation.
- * Updated 02/14/2020 to add basic evaluator and make public domain.
- * Based off the exact file I contributed to the project, with no
- * modifications from others.
+ * Updated 02/14/2020 to add basic evaluator, remove sqrt, and make public domain.
+ * Based off the exact file I contributed to the project, with no modifications from others.
  */
 
 public class SimplexCellularNoise {
@@ -70,7 +73,7 @@ public class SimplexCellularNoise {
 			double jx = JITTER_2D[ji + 0], jy = JITTER_2D[ji + 1];
 			double djx = jx - (c.dx + xi),
 					djy = jy - (c.dy + yi);
-			double distance = Math.sqrt(djx * djx + djy * djy);
+			double distance = djx * djx + djy * djy;
 			
 			if (distance < value) value = distance;
 		}
@@ -113,7 +116,7 @@ public class SimplexCellularNoise {
 				double jx = JITTER_2D[ji + 0], jy = JITTER_2D[ji + 1];
 				double djx = jx - (c.dx + xi),
 						djy = jy - (c.dy + yi);
-				double distance = Math.sqrt(djx * djx + djy * djy);
+				double distance = djx * djx + djy * djy;
 				
 				if (instance.f2Index >= 0) {
 					if (distance < results[instance.f2Index]) {
