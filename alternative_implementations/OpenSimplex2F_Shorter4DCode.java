@@ -9,8 +9,8 @@
  * that its closest vertex will be part of its base simplex.
  *
  * Unintuitively to me, this implementation was slower than the other. That remained the case even after a
- * few messy attempts at optimization (not included here). I upload this in case it serves as a reference for
- * a better GLSL, SIMD, or other implementation target. Its inintial step is shorter and branchless.
+ * few messy attempts at optimization (not included here). I upload this in case it serves as a better reference
+ * a GLSL, SIMD, or other implementation target. Its initial step is shorter and branchless.
  *
  * The 2D and 3D implementations are unchanged.
  */
