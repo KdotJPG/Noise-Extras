@@ -266,8 +266,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	
 	/**
 	 * 4D OpenSimplex2F noise base.
-	 * Current implementation not fully optimized by lookup tables.
-	 * But still comes out slightly ahead of Gustavson's Simplex in tests.
+	 * Alternative implementation.
 	 */
 	private double noise4_Base(double xs, double ys, double zs, double ws) {
 		double value = 0;
