@@ -5,8 +5,9 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
     // use cases, you can enable this for a ~3% performance improvement (according to rudimentary tests on my end).
     // Note that, after moving the pre-prime multiplication to after the trailing zero removal step, I found that
     // cases which break when PREPRIME=true but tile when it's false, became more elusive but were still possible.
-    // For example, frequency=0.125 and repeatX=repeatZ=6619035.
-    private static final boolean PREPRIME = true;
+    // For example, frequency=0.125 and repeatX=repeatZ=6619035. In general, I have not seen this occur below
+    // frequency*repeat = 65536 or so (e.g. frequency=0.125, repeat=524288).
+    private static final boolean PREPRIME = false;
     
     private static final int PRIME_X = 1091;
     private static final int PRIME_Y = 30869;
@@ -54,7 +55,7 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
         // Integer inverse matrix. When we invert the coordinates of the lattice vertices, which are in the
         // adjusted rotated coordinate space, we want them to stay as integers to keep modulo+hashing accurate.
         // We can achieve this by inverting the general form of the adjusted rotation matrix with the common
-        // denominator (matrixScale) multiplied out, as well as mutiplying repeatX and repeatZ out of the it
+        // denominator (matrixScale) multiplied out, as well as multiplying repeatX and repeatZ out of the it
         // from that matrix. Note that, since ii01 = -(ii00 + ii02), ii01 is not stored explicitly. Same for i21.
         // A -1 is shifted to matrixScale, so that the results tend towards positive instead of negative.
         // I must have made an error somewhere else for this to be necessary, but it works now.
@@ -142,7 +143,6 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
         di[index + 0] = i00 * rxyi + i02 * rzyi;
         di[index + 1] = I1 * (dxr + dyr + dzr);
         di[index + 2] = i20 * rxyi + i22 * rzyi;
-        di[index + 3] = lattice; // Use unused float as a boolean of sorts.
         
         int xyrv = xrv - yrv;
         int zyrv = zrv - yrv;
@@ -196,7 +196,6 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
         
         // Vertex loop.
         int index = ((int)(rxi + 63.5f) & 64) | ((int)(ryi + 127.5f) & 128) | ((int)(rzi + 255.5f) & 256);
-        long seed2 = seed + 529883000086039L;
         int i = 0;
         float value = 0;
         do {
@@ -223,7 +222,6 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
                 else if (zvp >= iModZ) zvp -= iModZ;
                 
                 // Hash
-                long seedToUse = di[index + i + 3] == 0 ? seed : seed2;
                 long hash = seed ^ (xvp * POSTPRIME_X) ^ yvp ^ (zvp * POSTPRIME_Z);
                 hash *= 2325943009213694033L;
                 hash ^= hash >> 30;
@@ -234,13 +232,13 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
                 // just clean gradient picking from a non-power-of-two sized set.
                 long giL = hash & 0x3FF_FFFF_FFFF_FFFFL;
                 giL *= 0x555_5555_5555_5555L;
-                int gi = (int)(giL >>= 56) & 0xFC;
+                int gi = (int)(giL >> 56) & 0xFC;
                 
                 // Gradient, multiply, and add.
                 value += a * (dx * GRAD3[gi + 0] + dy * GRAD3[gi + 1] + dz * GRAD3[gi + 2]);
                 
                 // Next on success
-                i = (int)dbp[index + i + 3];
+                i = (int)dbp[index | i | 3];
             } else i += 4;
         } while (i < 56);
         
