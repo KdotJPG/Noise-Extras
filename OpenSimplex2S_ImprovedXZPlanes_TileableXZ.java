@@ -147,7 +147,7 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
         int xyrv = xrv - yrv;
         int zyrv = zrv - yrv;
         dbp[index + 0] = (ii00 * xyrv + ii02 * zyrv);
-        dbp[index + 1] = (xrv + yrv + zrv) * PRIME_Y;
+        dbp[index + 1] = ((xrv + yrv + zrv) * 2 + lattice) * PRIME_Y;
         dbp[index + 2] = (ii20 * xyrv + ii22 * zyrv);
         dbp[index + 3] = nextOnSuccess * 4;
     }
@@ -191,7 +191,7 @@ public class OpenSimplex2S_ImprovedXZPlanes_TileableXZ {
         int rxyb = rxb - ryb;
         int rzyb = rzb - ryb;
         long xbp = (ii00 * rxyb + ii02 * rzyb);
-        long ybp = (rxb + ryb + rzb) * PRIME_Y;
+        long ybp = (rxb + ryb + rzb) * (2 * PRIME_Y);
         long zbp = (ii20 * rxyb + ii22 * rzyb);
         
         // Vertex loop.
