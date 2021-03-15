@@ -216,7 +216,7 @@ public class DomainRotatedClassicNoise {
         double zr = xy * -0.57735026918962599998 + (zz + ww);
         double wr = z * -0.866025403784439 + ww;
 
-        double value = noise4_UnrotatedBase(xr, yr, zr, wr);
+        double value = noise4_UnrotatedBase(derivatives, xr, yr, zr, wr);
 
         double xyd = derivatives.x + derivatives.y;
         double xyzd = xyd + derivatives.z;
@@ -253,7 +253,7 @@ public class DomainRotatedClassicNoise {
         double yr = xz * -0.57735026918962599998 + (yy + ww);
         double wr = y * -0.866025403784439 + ww;
 
-        double value = noise4_UnrotatedBase(xr, yr, zr, wr);
+        double value = noise4_UnrotatedBase(derivatives, xr, yr, zr, wr);
 
         double xzd = derivatives.x + derivatives.z;
         double xyzd = xzd + derivatives.y;
