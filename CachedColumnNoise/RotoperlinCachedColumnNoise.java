@@ -167,7 +167,7 @@ public class RotoperlinCachedColumnNoise {
         for (int i = 0; i < GRADIENTS_3D.length; i += 4) {
             double inRotatedVerticalDirection = 0;
             for (int j = 0; j < 3; j++) {
-                inRotatedVerticalDirection += GRADIENTS_3D[i + j];
+                inRotatedVerticalDirection += GRADIENTS_3D[i | j];
                 GRADIENTS_3D[i | j] *= NORMALIZING_MULTIPLIER_3D;
             }
             GRADIENTS_3D[i | 3] = inRotatedVerticalDirection * (ROOT3OVER3 * NORMALIZING_MULTIPLIER_3D);
