@@ -3,6 +3,10 @@
  * Lock in an X/Z position, and call getForY(y) for each successive Y position.
  * It remembers enough of the current state of the noise to achieve a ~1.8x speedup.
  *
+ * Works best for small steps in Y. Larger steps may see diminished performance gains.
+ * Therefore it is more ideal a step towards avoiding interpolation, than to use with it.
+ * Works great with conditional noise layer skipping!
+ *
  * Uses "Improve XZ Planes" domain rotation to reduce subtle diagonal patterns.
  *
  * Not recommended for 2D noise where X and Y are both horizontal, as there is some bias.
