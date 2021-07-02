@@ -11,11 +11,19 @@ using System.Runtime.CompilerServices;
 
 namespace Noise
 {
-    public class OpenSimplex2S_Stateless
+    public class OpenSimplex2S
     {
-        private const int PRIME_X = 7691;
-        private const int PRIME_Y = 10163;
-        private const int PRIME_Z = 4231;
+        private const long PRIME_X = 0x5205402B9270C86FL;
+        private const long PRIME_Y = 0x598CD327003817B5L;
+        private const long PRIME_Z = 0x5BCC226E9FA0BACBL;
+
+        private const double ROOT2OVER2 = 0.7071067811865476;
+        private const double SKEW2 = 0.366025403784439;
+        private const double UNSKEW2 = -0.21132486540518713;
+
+        private const double ROOT3OVER3 = 0.577350269189626;
+        private const double FALLBACK_ROTATE3 = 2.0 / 3.0;
+        private const double ROTATE3_ORTHOGONALIZER = UNSKEW2;
 
         /*
          * Noise Evaluators
@@ -28,10 +36,10 @@ namespace Noise
         {
 
             // Get points for A2* lattice
-            double s = 0.366025403784439 * (x + y);
+            double s = SKEW2 * (x + y);
             double xs = x + s, ys = y + s;
 
-            return noise2_Base(seed, xs, ys);
+            return Noise2_UnskewedBase(seed, xs, ys);
         }
 
         /**
@@ -45,84 +53,82 @@ namespace Noise
         {
 
             // Skew transform and rotation baked into one.
-            double xx = x * 0.7071067811865476;
-            double yy = y * 1.224744871380249;
+            double xx = x * ROOT2OVER2;
+            double yy = y * (ROOT2OVER2 * (1 + 2 * SKEW2));
 
-            return noise2_Base(seed, yy + xx, yy - xx);
+            return Noise2_UnskewedBase(seed, yy + xx, yy - xx);
         }
 
         /**
          * 2D  OpenSimplex2S/SuperSimplex noise base.
          */
-        private static float noise2_Base(long seed, double xs, double ys)
+        private static float Noise2_UnskewedBase(long seed, double xs, double ys)
         {
             // 2D OpenSimplex2S case is a modified 2D simplex noise.
-
-            const double G2 = -0.21132486540518713;
 
             int xsb = FastFloor(xs);
             int ysb = FastFloor(ys);
             float xi = (float)(xs - xsb);
             float yi = (float)(ys - ysb);
 
-            int xsbp = xsb * PRIME_X;
-            int ysbp = ysb * PRIME_Y;
+            long xsbp = xsb * PRIME_X;
+            long ysbp = ysb * PRIME_Y;
 
-            float t = (xi + yi) * (float)G2;
-            float x0 = xi + t;
-            float y0 = yi + t;
+            float t = (xi + yi) * (float)UNSKEW2;
+            float dx0 = xi + t;
+            float dy0 = yi + t;
 
-            float a0 = (2.0f / 3.0f) - x0 * x0 - y0 * y0;
-            float value = (a0 * a0) * (a0 * a0) * Grad(seed, xsbp, ysbp, x0, y0);
+            float a0 = (2.0f / 3.0f) - dx0 * dx0 - dy0 * dy0;
+            float value = (a0 * a0) * (a0 * a0) * Grad(seed, xsbp, ysbp, dx0, dy0);
 
-            float a1 = (float)(2 * (1 + 2 * G2) * (1 / G2 + 2)) * t + ((float)(-2 * (1 + 2 * G2) * (1 + 2 * G2)) + a0);
-            float x1 = x0 - (float)(1 + 2 * G2);
-            float y1 = y0 - (float)(1 + 2 * G2);
-            value += (a1 * a1) * (a1 * a1) * Grad(seed, xsbp + PRIME_X, ysbp + PRIME_Y, x1, y1);
+            float a1 = (float)(2 * (1 + 2 * UNSKEW2) * (1 / UNSKEW2 + 2)) * t + ((float)(-2 * (1 + 2 * UNSKEW2) * (1 + 2 * UNSKEW2)) + a0);
+            float dx1 = dx0 - (float)(1 + 2 * UNSKEW2);
+            float dy1 = dy0 - (float)(1 + 2 * UNSKEW2);
+            value += (a1 * a1) * (a1 * a1) * Grad(seed, xsbp + PRIME_X, ysbp + PRIME_Y, dx1, dy1);
 
             // Nested conditionals were faster than compact bit logic/arithmetic.
             float xmyi = xi - yi;
-            if (t < G2)
+            if (t < UNSKEW2)
             {
                 if (xi + xmyi > 1)
                 {
-                    float x2 = x0 - (float)(3 * G2 + 2);
-                    float y2 = y0 - (float)(3 * G2 + 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 - (float)(3 * UNSKEW2 + 2);
+                    float dy2 = dy0 - (float)(3 * UNSKEW2 + 1);
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp + (PRIME_X << 1), ysbp + PRIME_Y, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp + (PRIME_X << 1), ysbp + PRIME_Y, dx2, dy2);
                     }
                 }
                 else
                 {
-                    float x2 = x0 - (float)G2;
-                    float y2 = y0 - (float)(G2 + 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 - (float)UNSKEW2;
+                    float dy2 = dy0 - (float)(UNSKEW2 + 1);
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp + PRIME_Y, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp + PRIME_Y, dx2, dy2);
                     }
                 }
 
                 if (yi - xmyi > 1)
                 {
-                    float x3 = x0 - (float)(3 * G2 + 1);
-                    float y3 = y0 - (float)(3 * G2 + 2);
-                    float a3 = (2.0f / 3.0f) - x3 * x3 - y3 * y3;
+                    float dx3 = dx0 - (float)(3 * UNSKEW2 + 1);
+                    float dy3 = dy0 - (float)(3 * UNSKEW2 + 2);
+                    float a3 = (2.0f / 3.0f) - dx3 * dx3 - dy3 * dy3;
                     if (a3 > 0)
                     {
-                        value += (a3 * a3) * (a3 * a3) * Grad(seed, xsbp + PRIME_X, ysbp + (PRIME_Y << 1), x3, y3);
+                        value += (a3 * a3) * (a3 * a3) * Grad(seed, xsbp + PRIME_X, ysbp + (PRIME_Y << 1), dx3, dy3);
                     }
                 }
                 else
                 {
-                    float x3 = x0 - (float)(G2 + 1);
-                    float y3 = y0 - (float)G2;
-                    float a3 = (2.0f / 3.0f) - x3 * x3 - y3 * y3;
+                    float dx3 = dx0 - (float)(UNSKEW2 + 1);
+                    float dy3 = dy0 - (float)UNSKEW2;
+                    float a3 = (2.0f / 3.0f) - dx3 * dx3 - dy3 * dy3;
                     if (a3 > 0)
                     {
-                        value += (a3 * a3) * (a3 * a3) * Grad(seed, xsbp + PRIME_X, ysbp, x3, y3);
+                        value += (a3 * a3) * (a3 * a3) * Grad(seed, xsbp + PRIME_X, ysbp, dx3, dy3);
                     }
                 }
             }
@@ -130,43 +136,43 @@ namespace Noise
             {
                 if (xi + xmyi < 0)
                 {
-                    float x2 = x0 + (float)(1 + G2);
-                    float y2 = y0 + (float)G2;
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 + (float)(1 + UNSKEW2);
+                    float dy2 = dy0 + (float)UNSKEW2;
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp - PRIME_X, ysbp, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp - PRIME_X, ysbp, dx2, dy2);
                     }
                 }
                 else
                 {
-                    float x2 = x0 - (float)(G2 + 1);
-                    float y2 = y0 - (float)G2;
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 - (float)(UNSKEW2 + 1);
+                    float dy2 = dy0 - (float)UNSKEW2;
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp + PRIME_X, ysbp, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp + PRIME_X, ysbp, dx2, dy2);
                     }
                 }
 
                 if (yi < xmyi)
                 {
-                    float x2 = x0 + (float)G2;
-                    float y2 = y0 + (float)(G2 + 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 + (float)UNSKEW2;
+                    float dy2 = dy0 + (float)(UNSKEW2 + 1);
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp - PRIME_Y, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp - PRIME_Y, dx2, dy2);
                     }
                 }
                 else
                 {
-                    float x2 = x0 - (float)G2;
-                    float y2 = y0 - (float)(G2 + 1);
-                    float a2 = (2.0f / 3.0f) - x2 * x2 - y2 * y2;
+                    float dx2 = dx0 - (float)UNSKEW2;
+                    float dy2 = dy0 - (float)(UNSKEW2 + 1);
+                    float a2 = (2.0f / 3.0f) - dx2 * dx2 - dy2 * dy2;
                     if (a2 > 0)
                     {
-                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp + PRIME_Y, x2, y2);
+                        value += (a2 * a2) * (a2 * a2) * Grad(seed, xsbp, ysbp + PRIME_Y, dx2, dy2);
                     }
                 }
             }
@@ -175,68 +181,72 @@ namespace Noise
         }
 
         /**
-         * 3D Re-oriented 8-point BCC noise, classic orientation
-         * Proper substitute for what 3D SuperSimplex "should" be,
-         * in light of Forbidden Formulae.
-         * Use noise3_XYBeforeZ or noise3_XZBeforeY instead, wherever appropriate.
-         */
-        public static float Noise3_Classic(long seed, double x, double y, double z)
-        {
-
-            // Re-orient the cubic lattices via rotation, to produce the expected look on cardinal planar slices.
-            // If texturing objects that don't tend to have cardinal plane faces, you could even remove this.
-            // Orthonormal rotation. Not a skew transform.
-            double r = (2.0 / 3.0) * (x + y + z);
-            double xr = r - x, yr = r - y, zr = r - z;
-
-            // Evaluate both lattices to form a BCC lattice.
-            return noise3_BCC(seed, xr, yr, zr);
-        }
-
-        /**
-         * 3D Re-oriented 8-point BCC noise, with better visual isotropy in (X, Y).
+         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Y).
          * Recommended for 3D terrain and time-varied animations.
-         * The Z coordinate should always be the "different" coordinate in your use case.
-         * If Y is vertical in world coordinates, call noise3_XYBeforeZ(x, z, Y) or use noise3_XZBeforeY.
-         * If Z is vertical in world coordinates, call noise3_XYBeforeZ(x, y, Z).
-         * For a time varied animation, call noise3_XYBeforeZ(x, y, T).
+         * The Z coordinate should always be the "different" coordinate in whatever your use case is.
+         * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, z, Y) or use noise3_XZBeforeY.
+         * If Z is vertical in world coordinates, call Noise3_ImproveXZ(x, y, Z).
+         * For a time varied animation, call Noise3_ImproveXZ(x, y, T).
          */
-        public static float Noise3_ImproveXYPlanes(long seed, double x, double y, double z)
+        public static float Noise3_ImproveXY(long seed, double x, double y, double z)
         {
 
-            // Re-orient the cubic lattices without skewing, to make X and Y triangular like 2D.
+            // Re-orient the cubic lattices without skewing, so Z points up the main lattice diagonal,
+            // and the planes formed by XY are moved far out of alignment with the cube faces.
             // Orthonormal rotation. Not a skew transform.
             double xy = x + y;
-            double s2 = xy * -0.211324865405187;
-            double zz = z * 0.577350269189626;
-            double xr = x + s2 - zz, yr = y + s2 - zz;
-            double zr = xy * 0.577350269189626 + zz;
+            double s2 = xy * ROTATE3_ORTHOGONALIZER;
+            double zz = z * ROOT3OVER3;
+            double xr = x + s2 + zz;
+            double yr = y + s2 + zz;
+            double zr = xy * -ROOT3OVER3 + zz;
 
             // Evaluate both lattices to form a BCC lattice.
-            return noise3_BCC(seed, xr, yr, zr);
+            return Noise3_UnrotatedBase(seed, xr, yr, zr);
         }
 
         /**
-         * 3D Re-oriented 8-point BCC noise, with better visual isotropy in (X, Z).
+         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Z).
          * Recommended for 3D terrain and time-varied animations.
-         * The Y coordinate should always be the "different" coordinate in your use case.
-         * If Y is vertical in world coordinates, call noise3_XZBeforeY(x, Y, z).
-         * If Z is vertical in world coordinates, call noise3_XZBeforeY(x, Z, y) or use noise3_XYBeforeZ.
-         * For a time varied animation, call noise3_XZBeforeY(x, T, y) or use noise3_XYBeforeZ.
+         * The Y coordinate should always be the "different" coordinate in whatever your use case is.
+         * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, Y, z).
+         * If Z is vertical in world coordinates, call Noise3_ImproveXZ(x, Z, y) or use Noise3_ImproveXY.
+         * For a time varied animation, call Noise3_ImproveXZ(x, T, y) or use Noise3_ImproveXY.
          */
-        public static float Noise3_ImproveXZPlanes(long seed, double x, double y, double z)
+        public static float Noise3_ImproveXZ(long seed, double x, double y, double z)
         {
 
-            // Re-orient the cubic lattices without skewing, to make X and Z triangular like 2D.
+            // Re-orient the cubic lattices without skewing, so Y points up the main lattice diagonal,
+            // and the planes formed by XZ are moved far out of alignment with the cube faces.
             // Orthonormal rotation. Not a skew transform.
             double xz = x + z;
             double s2 = xz * -0.211324865405187;
-            double yy = y * 0.577350269189626;
-            double xr = x + s2 - yy; double zr = z + s2 - yy;
-            double yr = xz * 0.577350269189626 + yy;
+            double yy = y * ROOT3OVER3;
+            double xr = x + s2 + yy;
+            double zr = z + s2 + yy;
+            double yr = xz * -ROOT3OVER3 + yy;
 
             // Evaluate both lattices to form a BCC lattice.
-            return noise3_BCC(seed, xr, yr, zr);
+            return Noise3_UnrotatedBase(seed, xr, yr, zr);
+        }
+
+        /**
+         * 3D OpenSimplex2/SuperSimplex noise, classic orientation
+         * Proper substitute for what 3D SuperSimplex "should" be,
+         * in light of Forbidden Formulae.
+         * Use Noise3_ImproveXY or Noise3_ImproveXZ instead, wherever appropriate.
+         * They have less diagonal bias. This function's best use is as a fallback.
+         */
+        public static float Noise3_Fallback(long seed, double x, double y, double z)
+        {
+
+            // Re-orient the cubic lattices via rotation, to produce a familiar look.
+            // Orthonormal rotation. Not a skew transform.
+            double r = FALLBACK_ROTATE3 * (x + y + z);
+            double xr = r - x, yr = r - y, zr = r - z;
+
+            // Evaluate both lattices to form a BCC lattice.
+            return Noise3_UnrotatedBase(seed, xr, yr, zr);
         }
 
         /**
@@ -245,19 +255,19 @@ namespace Noise
          * It was actually faster to narrow down the points in the loop itself,
          * than to build up the index with enough info to isolate 8 points.
          */
-        private static float noise3_BCC(long seed, double xr, double yr, double zr)
+        private static float Noise3_UnrotatedBase(long seed, double xr, double yr, double zr)
         {
-            int xrbp = FastFloor(xr);
-            int yrbp = FastFloor(yr);
-            int zrbp = FastFloor(zr);
-            float xi = (float)(xr - xrbp);
-            float yi = (float)(yr - yrbp);
-            float zi = (float)(zr - zrbp);
+            int xrb = FastFloor(xr);
+            int yrb = FastFloor(yr);
+            int zrb = FastFloor(zr);
+            float xi = (float)(xr - xrb);
+            float yi = (float)(yr - yrb);
+            float zi = (float)(zr - zrb);
 
-            xrbp *= PRIME_X;
-            yrbp *= PRIME_Y;
-            zrbp *= PRIME_Z;
-            long seed2 = seed + 1293373;
+            long xrbp = xrb * PRIME_X;
+            long yrbp = yrb * PRIME_Y;
+            long zrbp = zrb * PRIME_Z;
+            long seed2 = seed ^ -0x52D547B2E96ED629L;
 
             int xNMask = (int)(-0.5f - xi);
             int yNMask = (int)(-0.5f - yi);
@@ -313,7 +323,7 @@ namespace Noise
                     float y4 = y1;
                     float z4 = z1;
                     value += (a4 * a4) * (a4 * a4) * Grad(seed2,
-                        xrbp + (xNMask & (PRIME_X * 2)), yrbp + PRIME_Y, zrbp + PRIME_Z, x4, y4, z4);
+                        xrbp + (xNMask & unchecked(PRIME_X * 2)), yrbp + PRIME_Y, zrbp + PRIME_Z, x4, y4, z4);
                     skip5 = true;
                 }
             }
@@ -408,7 +418,7 @@ namespace Noise
                     float y9 = y1;
                     float z9 = (zNMask | 1) + z1;
                     value += (a9 * a9) * (a9 * a9) * Grad(seed2,
-                        xrbp + (xNMask & (PRIME_X * 2)), yrbp + PRIME_Y, zrbp + (zNMask & (PRIME_Z << 1)), x9, y9, z9);
+                        xrbp + (xNMask & unchecked(PRIME_X * 2)), yrbp + PRIME_Y, zrbp + (zNMask & (PRIME_Z << 1)), x9, y9, z9);
                 }
             }
 
@@ -433,20 +443,20 @@ namespace Noise
          */
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float Grad(long seed, int xrvp, int yrvp, float dx, float dy)
+        private static float Grad(long seed, long xrvp, long yrvp, float dx, float dy)
         {
             long hash = seed ^ xrvp ^ yrvp;
-            hash *= 0x5555555555555555L;
+            hash *= 0x53A3F72DEEC546F5L;
             hash ^= hash >> 56;
             int gi = (int)hash & 0xFE;
             return GRADIENTS_2D[gi | 0] * dx + GRADIENTS_2D[gi | 1] * dy;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float Grad(long seed, int xrvp, int yrvp, int zrvp, float dx, float dy, float dz)
+        private static float Grad(long seed, long xrvp, long yrvp, long zrvp, float dx, float dy, float dz)
         {
             long hash = (seed ^ xrvp) ^ (yrvp ^ zrvp);
-            hash *= 0x5555555555555555L;
+            hash *= 0x53A3F72DEEC546F5L;
             hash ^= hash >> 54;
             int gi = (int)hash & 0x3FC;
             return GRADIENTS_3D[gi | 0] * dx + GRADIENTS_3D[gi | 1] * dy + GRADIENTS_3D[gi | 2] * dz;
@@ -474,7 +484,7 @@ namespace Noise
 
         static OpenSimplex2S()
         {
-            
+
             int[] grad2FillIndices = new int[] { 1, 4, 7, 10, 13, 16, 19, 22 };
             GRADIENTS_2D = new float[N_GRADS_2D * 2];
             float[] grad2 = {
