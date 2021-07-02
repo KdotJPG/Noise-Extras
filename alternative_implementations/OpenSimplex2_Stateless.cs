@@ -30,7 +30,7 @@ namespace Noise
          */
 
         /**
-         * 2D OpenSimplex2S/SuperSimplex noise, standard lattice orientation.
+         * 2D OpenSimplex2 noise, standard lattice orientation.
          */
         public static float Noise2(long seed, double x, double y)
         {
@@ -43,7 +43,7 @@ namespace Noise
         }
 
         /**
-         * 2D OpenSimplex2S/SuperSimplex noise, with Y pointing down the main diagonal.
+         * 2D OpenSimplex2 noise, with Y pointing down the main diagonal.
          * Might be better for a 2D sandbox style game, where Y is vertical.
          * Probably slightly less optimal for heightmaps or continent maps,
          * unless your map is centered around an equator. It's a subtle
@@ -60,7 +60,7 @@ namespace Noise
         }
 
         /**
-         * 2D OpenSimplex2S/SuperSimplex noise base.
+         * 2D OpenSimplex2 noise base.
          */
         private static float Noise2_UnskewedBase(long seed, double xs, double ys)
         {
@@ -118,7 +118,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Y).
+         * 3D OpenSimplex2 noise, with better visual isotropy in (X, Y).
          * Recommended for 3D terrain and time-varied animations.
          * The Z coordinate should always be the "different" coordinate in whatever your use case is.
          * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, z, Y) or use noise3_XZBeforeY.
@@ -143,7 +143,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Z).
+         * 3D OpenSimplex2 noise, with better visual isotropy in (X, Z).
          * Recommended for 3D terrain and time-varied animations.
          * The Y coordinate should always be the "different" coordinate in whatever your use case is.
          * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, Y, z).
@@ -168,7 +168,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, classic orientation
+         * 3D OpenSimplex2 noise, classic orientation
          * Proper substitute for what 3D SuperSimplex "should" be,
          * in light of Forbidden Formulae.
          * Use Noise3_ImproveXY or Noise3_ImproveXZ instead, wherever appropriate.
@@ -187,7 +187,7 @@ namespace Noise
         }
 
         /**
-         * Generate overlapping cubic lattices for 3D OpenSimplex2/SuperSimplex noise.
+         * Generate overlapping cubic lattices for 3D OpenSimplex2 noise.
          */
         private static float Noise3_UnrotatedBase(long seed, double xr, double yr, double zr)
         {
