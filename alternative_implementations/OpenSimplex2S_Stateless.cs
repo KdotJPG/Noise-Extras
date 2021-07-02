@@ -181,7 +181,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Y).
+         * 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Y).
          * Recommended for 3D terrain and time-varied animations.
          * The Z coordinate should always be the "different" coordinate in whatever your use case is.
          * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, z, Y) or use noise3_XZBeforeY.
@@ -206,7 +206,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, with better visual isotropy in (X, Z).
+         * 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Z).
          * Recommended for 3D terrain and time-varied animations.
          * The Y coordinate should always be the "different" coordinate in whatever your use case is.
          * If Y is vertical in world coordinates, call Noise3_ImproveXZ(x, Y, z).
@@ -231,7 +231,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2/SuperSimplex noise, classic orientation
+         * 3D OpenSimplex2S/SuperSimplex noise, classic orientation
          * Proper substitute for what 3D SuperSimplex "should" be,
          * in light of Forbidden Formulae.
          * Use Noise3_ImproveXY or Noise3_ImproveXZ instead, wherever appropriate.
