@@ -30,7 +30,7 @@ namespace Noise
          */
 
         /**
-         * 2D OpenSimplex2 noise, standard lattice orientation.
+         * 2D Simplex noise, standard lattice orientation.
          */
         public static float Noise2(long seed, double x, double y)
         {
@@ -43,7 +43,7 @@ namespace Noise
         }
 
         /**
-         * 2D OpenSimplex2 noise, with Y pointing down the main diagonal.
+         * 2D Simplex noise, with Y pointing down the main diagonal.
          * Might be better for a 2D sandbox style game, where Y is vertical.
          * Probably slightly less optimal for heightmaps or continent maps,
          * unless your map is centered around an equator. It's a subtle
@@ -60,7 +60,7 @@ namespace Noise
         }
 
         /**
-         * 2D OpenSimplex2 noise base.
+         * 2D Simplex noise base.
          */
         private static float Noise2_UnskewedBase(long seed, double xs, double ys)
         {
