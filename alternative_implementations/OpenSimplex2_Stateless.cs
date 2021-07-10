@@ -168,9 +168,7 @@ namespace Noise
         }
 
         /**
-         * 3D OpenSimplex2 noise, classic orientation
-         * Proper substitute for what 3D SuperSimplex "should" be,
-         * in light of Forbidden Formulae.
+         * 3D OpenSimplex2 noise, fallback rotation option
          * Use Noise3_ImproveXY or Noise3_ImproveXZ instead, wherever appropriate.
          * They have less diagonal bias. This function's best use is as a fallback.
          */
