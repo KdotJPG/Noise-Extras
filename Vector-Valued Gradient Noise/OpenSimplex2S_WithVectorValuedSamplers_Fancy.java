@@ -4,7 +4,7 @@
  * - high granularity gradient sampling
  */
 
-public class OpenSimplex2S_WithVectorValued_Fancy {
+public class OpenSimplex2S_WithVectorValuedSamplers_Fancy {
 
     private static final long PRIME_X = 0x5205402B9270C86FL;
     private static final long PRIME_Y = 0x598CD327003817B5L;
@@ -52,7 +52,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 2D Simplex noise, with Y pointing down the main diagonal.
+     * 2D OpenSimplex2S/SuperSimplex noise, with Y pointing down the main diagonal.
      * Consider this if one coordinate is vertical or equatorial.
      * Not advised if both X and Y are horizontal.
      * Value range: [-1, 1]
@@ -67,7 +67,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 2D OpenSimplex2S/SuperSimplex noise base.
+     * 2D OpenSimplex2S/SuperSimplex noise unskewed base.
      * Value range: [-1, 1]
      */
     private static float noise2_UnskewedBase(long seed, double xs, double ys) {
@@ -176,7 +176,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 2D OpenSimplex2S/SuperSimplex noise, standard lattice orientation.
+     * Vector-valued 2D OpenSimplex2S/SuperSimplex noise, standard lattice orientation.
      * Vector magnitude range: [0, 1]
      */
     public static void vectorValuedNoise2(long seed, double x, double y, Vec2 destination) {
@@ -189,7 +189,22 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 2D OpenSimplex2S/SuperSimplex vector-output noise.
+     * Vector-valued 2D OpenSimplex2S/SuperSimplex noise, with Y pointing down the main diagonal.
+     * Consider this if one coordinate is vertical or equatorial.
+     * Not advised if both X and Y are horizontal.
+     * Magnitude range: [0, 1]
+     */
+    public static void vectorValuedNoise2_ImproveX(long seed, double x, double y, OpenSimplex2S_WithFrameVectorValuedEvaluators.Vec2 destination) {
+
+        // Skew transform and rotation baked into one.
+        double xx = x * ROOT2OVER2;
+        double yy = y * (ROOT2OVER2 * (1 + 2 * SKEW_2D));
+
+        vectorValuedNoise2_UnskewedBase(seed, yy + xx, yy - xx, destination);
+    }
+
+    /**
+     * Vector-valued 2D OpenSimplex2S/SuperSimplex vector-output noise.
      * Vector magnitude range: [0, 1]
      */
     private static void vectorValuedNoise2_UnskewedBase(long seed, double xs, double ys, Vec2 destination) {
@@ -347,9 +362,8 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 3D OpenSimplex2S/SuperSimplex noise, fallback rotation option
+     * 3D OpenSimplex2S/SuperSimplex noise, fallback lattice orientation.
      * Use noise3_ImproveXY or noise3_ImproveXZ instead, wherever appropriate.
-     * They have less diagonal bias. This function's best use is as a fallback.
      * Value range: [-1, 1]
      */
     public static float noise3_Fallback(long seed, double x, double y, double z) {
@@ -363,7 +377,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * Generate unrotated base 3D noise using the BCC lattice.
+     * Generates unrotated base 3D noise using the BCC lattice.
      * Value range: [-1, 1]
      */
     private static float noise3_UnrotatedBase(long seed, double xr, double yr, double zr) {
@@ -534,7 +548,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Y).
+     * Vector-valued 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Y).
      * Recommended for 3D terrain and time-varied animations.
      * The Z coordinate should always be the "different" coordinate in whatever your use case is.
      * If Y is vertical in world coordinates, call noise3_ImproveXZ(x, z, Y) or use noise3_XZBeforeY.
@@ -558,7 +572,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Z).
+     * Vector-valued 3D OpenSimplex2S/SuperSimplex noise, with better visual isotropy in (X, Z).
      * Recommended for 3D terrain and time-varied animations.
      * The Y coordinate should always be the "different" coordinate in whatever your use case is.
      * If Y is vertical in world coordinates, call noise3_ImproveXZ(x, Y, z).
@@ -582,9 +596,8 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * 3D OpenSimplex2S/SuperSimplex noise, fallback rotation option
+     * Vector-valued 3D OpenSimplex2S/SuperSimplex noise, fallback lattice orientation.
      * Use noise3_ImproveXY or noise3_ImproveXZ instead, wherever appropriate.
-     * They have less diagonal bias. This function's best use is as a fallback.
      * Vector magnitude range: [0, 1]
      */
     public static void vectorValuedNoise3_Fallback(long seed, double x, double y, double z, Vec3 destination) {
@@ -598,7 +611,7 @@ public class OpenSimplex2S_WithVectorValued_Fancy {
     }
 
     /**
-     * Generate unrotated base 3D noise using the BCC lattice.
+     * Generates unrotated base vector-valued 3D noise using the BCC lattice.
      * Vector magnitude range: [0, 1]
      */
     private static void vectorValuedNoise3_UnrotatedBase(long seed, double xr, double yr, double zr, Vec3 destination) {
