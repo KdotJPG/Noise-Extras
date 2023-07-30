@@ -2,19 +2,21 @@
  * K.jpg's OpenSimplex 2, faster variant
  *
  * Reference, with slightly different 4D implementation. See the following link for the original file:
- * https://github.com/KdotJPG/OpenSimplex2/blob/master/java/OpenSimplex2F.java
+ * https://github.com/KdotJPG/OpenSimplex2/blob/master/_old/java/OpenSimplex2.java
  *
- * The 4D implementation I uploaded to the main repo, first finds the closest vertex on one fixed lattice copy,
- * then successively finds it for the rest. This one instead starts on a lattice copy where it seems certain
- * that its closest vertex will be part of its base simplex.
+ * The 4D implementation contained within the main repo first finds the closest vertex on one fixed lattice instance,
+ * then successively finds it for the rest. This one instead chooses a starting lattice instance where it seems
+ * certain that its closest vertex will be part of its base simplex.
  *
  * Unintuitively to me, this implementation was slower than the other. That remained the case even after a
- * few messy attempts at optimization (not included here). I upload this in case it serves as a better reference
+ * few messy attempts at optimization (not included here). I provide this in case it serves as a better reference
  * a GLSL, SIMD, or other implementation target. Its initial step is shorter and branchless.
+ *
+ * Note that this was based off an old version of the noise from before moving to instanceless seedability.
  *
  * The 2D and 3D implementations are unchanged.
  */
-public class OpenSimplex2F_Shorter4DCode {
+public class OpenSimplex2_Shorter4DCode {
 	
 	private static final int PSIZE = 2048;
 	private static final int PMASK = 2047;
@@ -24,7 +26,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	private Grad3[] permGrad3;
 	private Grad4[] permGrad4;
 
-	public OpenSimplex2F_Shorter4DCode(long seed) {
+	public OpenSimplex2_Shorter4DCode(long seed) {
 		perm = new short[PSIZE];
 		permGrad2 = new Grad2[PSIZE];
 		permGrad3 = new Grad3[PSIZE];
@@ -211,7 +213,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	}
 	
 	/**
-	 * 4D OpenSimplex2F noise, classic lattice orientation.
+	 * 4D OpenSimplex2 noise, classic lattice orientation.
 	 */
 	public double noise4_Classic(double x, double y, double z, double w) {
 		
@@ -223,7 +225,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	}
 	
 	/**
-	 * 4D OpenSimplex2F noise, with XY and ZW forming orthogonal triangular-based planes.
+	 * 4D OpenSimplex2 noise, with XY and ZW forming orthogonal triangular-based planes.
 	 * Recommended for 3D terrain, where X and Y (or Z and W) are horizontal.
 	 * Recommended for noise(x, y, sin(time), cos(time)) trick.
 	 */
@@ -237,7 +239,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	}
 	
 	/**
-	 * 4D OpenSimplex2F noise, with XZ and YW forming orthogonal triangular-based planes.
+	 * 4D OpenSimplex2 noise, with XZ and YW forming orthogonal triangular-based planes.
 	 * Recommended for 3D terrain, where X and Z (or Y and W) are horizontal.
 	 */
 	public double noise4_XZBeforeYW(double x, double y, double z, double w) {
@@ -250,7 +252,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	}
 	
 	/**
-	 * 4D OpenSimplex2F noise, with XYZ oriented like noise3_Classic,
+	 * 4D OpenSimplex2 noise, with XYZ oriented like noise3_Classic,
 	 * and W for an extra degree of freedom. W repeats eventually.
 	 * Recommended for time-varied animations which texture a 3D object (W=time)
 	 */
@@ -265,7 +267,7 @@ public class OpenSimplex2F_Shorter4DCode {
 	}
 	
 	/**
-	 * 4D OpenSimplex2F noise base.
+	 * 4D OpenSimplex2 noise base.
 	 * Alternative implementation.
 	 */
 	private double noise4_Base(double xs, double ys, double zs, double ws) {
