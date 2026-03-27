@@ -28,7 +28,7 @@ public static class CellularNoise {
         z += xzOffset;
         y = yRescaled - xPlusZ * Root3Over3;
 
-        int xBase = ExtraMath.FastFloor(x), yBase = ExtraMath.FastFloor(y), zBase = ExtraMath.FastFloor(z);
+        int xBase = FastFloor(x), yBase = FastFloor(y), zBase = FastFloor(z);
         double xDelta = x - xBase, yDelta = y - yBase, zDelta = z - zBase;
         long xBasePrimed = xBase * PRIME_X, yBasePrimed = yBase * PRIME_Y, zBasePrimed = zBase * PRIME_Z;
 
@@ -90,7 +90,7 @@ public static class CellularNoise {
         z += xzOffset;
         y = yRescaled - xPlusZ * Root3Over3;
 
-        int xBase = ExtraMath.FastFloor(x), yBase = ExtraMath.FastFloor(y), zBase = ExtraMath.FastFloor(z);
+        int xBase = FastFloor(x), yBase = FastFloor(y), zBase = FastFloor(z);
         double xDelta = x - xBase, yDelta = y - yBase, zDelta = z - zBase;
         long xBasePrimed = xBase * PRIME_X, yBasePrimed = yBase * PRIME_Y, zBasePrimed = zBase * PRIME_Z;
 
@@ -151,6 +151,9 @@ public static class CellularNoise {
 
         return maxDistanceSquaredToClosest;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int FastFloor(double value) => value < (int)value ? (int)value - 1 : (int)value;
 
     private static readonly Cell[] Cells;
     
